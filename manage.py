@@ -16,7 +16,7 @@ def main():
         return
     for command in sys.argv[1:]:
         if command == 'run':
-            from main import run
+            from web import run
             run()
             continue
         if command == 'scrapStatus':

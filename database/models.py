@@ -16,7 +16,7 @@ class DoctorStatus(Base):
     roomStatus = Column(String(10))
     calledNumber = Column(String(5))
     timeDelta = Column(Integer)
-    createDate = Column(Date, default=datetime.datetime.now())
+    createDate = Column(Date, default=datetime.datetime.now().date())
     updateTime = Column(TIMESTAMP(True), nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
     def __repr__(self):
@@ -61,13 +61,16 @@ class DoctorStatistic(Base):
     # Table Structure
     department = Column(String(20), primary_key=True, nullable=False)
     doctor = Column(String(10), primary_key=True, nullable=False)
-    lastDayAvg = Column(Integer)
-    lastDayCount = Column(Integer)
-    lastMonthAvg = Column(Integer)
-    lastMonthCount = Column(Integer)
-    lastYearAvg = Column(Integer)
-    lastYearCount = Column(Integer)
-    updateDate = Column(Date)
+    currentAvg = Column(Integer, default=0)
+    currentCount = Column(Integer, default=0)
+    lastPeriodAvg = Column(Integer, default=0)
+    lastPeriodCount = Column(Integer, default=0)
+    # lastMonthAvg = Column(Integer, default=0)
+    # lastMonthCount = Column(Integer, default=0)
+    # lastYearAvg = Column(Integer, default=0)
+    # lastYearCount = Column(Integer, default=0)
+    currentDate = Column(TIMESTAMP(True), nullable=False, default=datetime.datetime.now())
+    currentPeriod = Column(Enum(u'上午', u'下午', u'晚上'))
 
     def __repr__(self):
         return '<DoctorStatistic %r>' % (self.department + '/' + self.doctor)
