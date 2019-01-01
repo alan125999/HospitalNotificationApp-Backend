@@ -106,7 +106,7 @@ periodDict = {
 
 def scrapStatus():
     # urlPrefix = 'http://59.125.231.55/trews/api/GetDptRoomInfo?DptID='
-    urlPrefix = 'http://localhost:8000/server.php?id='
+    urlPrefix = 'http://www2.cs.ccu.edu.tw/~wth105u/cralwerData/server.php?id='
     for key, value in deptDict.items():
         # Combine Url
         url = urlPrefix + key
@@ -139,7 +139,7 @@ def scrapStatus():
                 period = periodDict[opdTimeID]
 
                 # Update Status
-                print('Status: {}/{} '.format(department, name, calledNumber))
+                print('Status: {}/{} {}'.format(deptName, doctorName, calledNumber))
                 updateDoctorStatus(deptName, doctorName, period, RoomStatus, calledNumber)
 
                 # Create Doctor
@@ -206,7 +206,7 @@ def createScheduleDoctors(doctors, period, date, department):
     for doctor in doctors:
         name = regex.sub('', doctor)
         if name == '': continue
-        print('Schedule: {} {} {}/{}'.format(date.strftime('%Y-%m-%d'), periodDict[period], department, name)
+        print('Schedule: {} {} {}/{}'.format(date.strftime('%Y-%m-%d'), periodDict[period], department, name))
         createSchedule(department, name, date, periodDict[period])
 def parseScheduleDate(date):
     dateParam = date.string[:-3].split('/')
