@@ -198,7 +198,7 @@ def parseSchedule(soup, department):
             createScheduleDoctors(afternoon, 'A', dateObj, department)
             createScheduleDoctors(night, 'Z', dateObj, department)
 
-regex = re.compile(r"[S\d◎\(\)\ ]|休診|代診", re.IGNORECASE)
+regex = re.compile(r"[SG\d◎\(\)\ ]|休診|代診", re.IGNORECASE)
 def createScheduleDoctors(doctors, period, date, department):
     if doctors is None: return
 
