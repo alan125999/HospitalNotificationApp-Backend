@@ -7,7 +7,9 @@ app = Flask(__name__)
 @app.route('/status/<doctor>')
 def status(doctor):
     # doctor = doctor.encode('raw_unicode_escape').decode('utf-8')
-    return jsonify(dict(getDoctorStatus(doctor)))
+    docObj = getDoctorStatus(doctor)
+    if docObj is None: docObj = []
+    return jsonify(dict(docObj))
 
 @app.route('/schedule')
 def schedule():
