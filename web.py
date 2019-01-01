@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from database.controller import getDoctorStatus, getDoctorSchedule
+import json
 
 app = Flask(__name__)
 
 @app.route('/status/<doctor>')
 def status(doctor):
-    doctor = doctor.encode('raw_unicode_escape').decode('utf-8')
+    # doctor = doctor.encode('raw_unicode_escape').decode('utf-8')
     return jsonify(dict(getDoctorStatus(doctor)))
 
 @app.route('/schedule')

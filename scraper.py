@@ -3,7 +3,7 @@
 import urllib
 import urllib.request
 import json
-from database.controller import updateDoctorStatus, createDepartment, createDoctor, createSchedule
+from database.controller import updateDoctorStatus, createDepartment, createDoctor, createSchedule, removeAllOutdateSchedule, removeAllOutdateStatus
 from bs4 import BeautifulSoup
 import datetime
 import string
@@ -215,3 +215,7 @@ def parseScheduleDate(date):
 def storeAllDepartment():
     for key, value in deptDict.items():
         createDepartment(value, key)
+
+def clean():
+    removeAllOutdateStatus()
+    removeAllOutdateSchedule()
