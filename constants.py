@@ -88,8 +88,8 @@ deptDict = {
 }
 
 scrapUrlPrefix = dict(
-    # status = 'http://59.125.231.55/trews/api/GetDptRoomInfo?DptID=',
-    status = 'http://www2.cs.ccu.edu.tw/~wth105u/cralwerData/server.php?id=',
+    status = 'http://59.125.231.55/trews/api/GetDptRoomInfo?DptID=',
+    # status = 'http://www2.cs.ccu.edu.tw/~wth105u/cralwerData/server.php?id=',
     schedule = 'http://www2.cych.org.tw/WebToNewRegister/webSerchDrSch.aspx?No=',
 )
 
