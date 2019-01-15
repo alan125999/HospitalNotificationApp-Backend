@@ -78,8 +78,9 @@ def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
                 status.period = period
                 status.roomStatus = roomStatus
                 status.calledNumber = calledNumber
-                stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentAvg) / (stats.lastPeriodCount + 1)
-                stats.lastPeriodCount += 1
+                if stats.currentAvg != None:
+                    stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentAvg) / (stats.lastPeriodCount + 1)
+                    stats.lastPeriodCount += 1
                 stats.currentAvg = None
                 stats.currentCount = calledNumber
                 stats.currentDate = now.date(),
