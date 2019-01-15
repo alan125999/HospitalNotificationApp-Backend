@@ -5,6 +5,12 @@ from sqlalchemy.types import Integer, String, Time, TIMESTAMP, Date, Enum
 from database.database import Base
 import datetime
 
+periodDict = dict(
+    morning = u'上午',
+    afternoon = u'下午',
+    night = u'晚上',
+)
+
 class DoctorStatus(Base):
     # Table name
     __tablename__ = 'doctorStatuses'
@@ -61,16 +67,16 @@ class DoctorStatistic(Base):
     # Table Structure
     department = Column(String(20), primary_key=True, nullable=False)
     doctor = Column(String(10), primary_key=True, nullable=False)
-    currentAvg = Column(Integer, default=0)
+    currentAvg = Column(Integer)
     currentCount = Column(Integer, default=0)
-    lastPeriodAvg = Column(Integer, default=0)
+    lastPeriodAvg = Column(Integer)
     lastPeriodCount = Column(Integer, default=0)
     # lastMonthAvg = Column(Integer, default=0)
     # lastMonthCount = Column(Integer, default=0)
     # lastYearAvg = Column(Integer, default=0)
     # lastYearCount = Column(Integer, default=0)
     currentDate = Column(Date, nullable=False, default=datetime.datetime.now().date())
-    currentPeriod = Column(Enum(u'上午', u'下午', u'晚上'))
+    currentPeriod = Column(Enum(*list(periodDict.values())))
 
     def __repr__(self):
         return '<DoctorStatistic %r>' % (self.department + '/' + self.doctor)
@@ -81,7 +87,7 @@ class DoctorSchedule(Base):
     department = Column(String(20))
     doctor = Column(String(10))
     date = Column(Date)
-    period = Column(Enum(u'上午', u'下午', u'晚上'))
+    period = Column(Enum(*list(periodDict.values())))
 
     def __iter__(self):
         yield 'department', self.department

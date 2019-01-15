@@ -22,7 +22,7 @@ helpMsg = '''
 def main():
     import sys
     if len(sys.argv) < 2:
-        print(sys.argv)
+        print(helpMsg)
         return
     for command in sys.argv[1:]:
         if command == 'run':

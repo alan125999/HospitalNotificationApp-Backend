@@ -1,103 +1,105 @@
 from database.database import db_session
-from database.models import DoctorStatus, Doctor, Department, DoctorSchedule, DoctorStatistic
+from database.models import DoctorStatus, Doctor, Department, DoctorSchedule, DoctorStatistic, periodDict
 import datetime
 
-weight = {
-    'day': 5,
-    'month': 5,
-    'year': 5,
-}
-def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
-    # Get Previous Doctor Status
-    status = DoctorStatus.query \
-        .filter_by(doctor = doctor) \
+def getDoctorStats(department, doctor):
+    stats = DoctorStatistic.query \
         .filter_by(department = department) \
+        .filter_by(doctor = doctor) \
         .first()
+    return stats
+
+def getStatus(department, doctor):
+    status = DoctorStatus.query \
+        .filter_by(department = department) \
+        .filter_by(doctor = doctor) \
+        .first()
+    return status
+
+def createDoctorStats(department, doctor, period, calledNumber):
+    stats = DoctorStatistic(
+        department = department,
+        doctor = doctor,
+        currentDate = datetime.datetime.now().date(),
+        currentPeriod = period
+    )
+    return stats
+
+def createDoctorStatus(department, doctor, period, roomStatus, calledNumber):
+    newDoctorStatus = DoctorStatus(
+        department = department,
+        doctor = doctor,
+        period = period,
+        roomStatus = roomStatus,
+        calledNumber = calledNumber
+    )
+    return newDoctorStatus
+    
+def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
+    calledNumber = int(calledNumber)
+    now = datetime.datetime.now()
 
     # Get Stats
-    newStats = False
-    stats = DoctorStatistic.query \
-            .filter_by(department = department) \
-            .filter_by(doctor = doctor) \
-            .first()
-    if stats is None: 
-        newStats = True
-        stats = DoctorStatistic(
-            department = department,
-            doctor = doctor
-        )
-        stats.currentCount = calledNumber
-        if period == u'上午':
-            hour = 8
-            minute = 0
-        elif period == u'下午':
-            hour = 13
-            minute = 30
-        elif period == u'晚上':
-            hour = 17
-            minute = 0
-        now = datetime.datetime.now()
-        stats.currentAvg = (now - now.replace(hour=hour, minute=minute)).total_seconds() / int(calledNumber) if int(calledNumber) != 0 else 0
-        stats.currentDate = now.date()
-        stats.currentPeriod = period
+    stats = getDoctorStats(department, doctor)
 
-    # if exists, update
-    if status is not None:
-        if(status.calledNumber != calledNumber):
-            if newStats is False:
-                updateStatistic(stats, period, calledNumber, status.calledNumber, status.updateTime)
+    # Get Doctor Status
+    status = getStatus(department, doctor)
 
-                status.calledNumber = calledNumber
-                status.period = period
-                status.timeDelta = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentCount * stats.currentAvg) / (stats.lastPeriodCount + stats.currentCount) if (stats.lastPeriodCount + stats.currentCount) != 0 else 0
-
-    else:
-        # Create Model
-        newDoctorStatus = DoctorStatus(
-            department = department,
-            doctor = doctor,
-            period = period,
-            roomStatus = roomStatus,
-            calledNumber = calledNumber
-        )
-        if newStats :
+    if status is None:
+        if stats is None:
+            stats = createDoctorStats(department, doctor, period, calledNumber)
+            status = createDoctorStatus(department, doctor, period, roomStatus, calledNumber)
             db_session.add(stats)
+            db_session.add(status)
         else:
-            updateStatistic(stats, period, calledNumber, status.calledNumber, status.updateTime)
-        newDoctorStatus.timeDelta = stats.currentAvg
-        # Add to session
-        db_session.add(newDoctorStatus)
-        
-
+            status = createDoctorStatus(department, doctor, period, roomStatus, calledNumber)
+            status.timeDelta = stats.currentAvg
+            stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentAvg) / (stats.lastPeriodCount + 1)
+            stats.lastPeriodCount += 1
+            stats.currentAvg = None
+            stats.currentCount = calledNumber
+            stats.currentDate = now.date(),
+            stats.currentPeriod = period
+            db_session.add(status)
+    else:
+        if status.calledNumber != calledNumber:
+            if status.period == stats.currentPeriod and stats.currentDate != datetime.datetime.now().date():
+                deltaNum = calledNumber - stats.currentCount
+                deltaTime = (status.updateTime - now).total_seconds()
+                if stats.currentAvg == None:
+                    stats.currentAvg = deltaTime / deltaNum
+                else:
+                    stats.currentAvg = (stats.currentAvg * stats.currentCount + deltaTime) / calledNumber
+                stats.currentCount = calledNumber
+                status.calledNumber = calledNumber
+                status.timeDelta = stats.currentAvg * 0.6 + stats.lastPeriodAvg * 0.4
+                status.roomStatus = roomStatus
+            else:
+                status.period = period
+                status.roomStatus = roomStatus
+                status.calledNumber = calledNumber
+                stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentAvg) / (stats.lastPeriodCount + 1)
+                stats.lastPeriodCount += 1
+                stats.currentAvg = None
+                stats.currentCount = calledNumber
+                stats.currentDate = now.date(),
+                stats.currentPeriod = period
 
     # Commit to database
     db_session.commit()
-def updateStatistic(stats, period, calledNumber, prevCalledNumber, prevUpTime):
-    now = datetime.datetime.now()
-    deltaCount = int(calledNumber) - prevCalledNumber
-    deltaTime = (now - prevUpTime).total_seconds()
-    avg = deltaTime / deltaCount if deltaCount != 0 else 0
 
-    if compareTime(stats.currentDate, stats.currentPeriod, period):
-        stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentCount) / stats.lastPeriodCount + 1
-        stats.lastPeriodCount = stats.lastPeriodCount + 1 if stats.lastPeriodCount < 20 else 20
-        stats.currentCount = calledNumber
-        stats.currentAvg = avg
-        stats.currentDate = now.date()
-        stats.currentPeriod = period
-    else: 
-        stats.currentAvg = ( deltaTime + stats.currentAvg * stats.currentCount ) / (deltaCount + stats.currentCount) if (deltaCount + stats.currentCount) != 0 else 0
-        stats.currentCount = deltaCount + stats.currentCount
 
 def createDoctor(name, id):
+    # Ignore if empty
+    if id == None: return
+
     # Query
     doctor = Doctor.query \
         .filter_by(name = name) \
         .first()
 
     # if exists, return
-    if doctor is not None: 
-        return
+    if doctor is not None: return
 
     # Create
     newDoctor = Doctor(
@@ -201,8 +203,8 @@ def removeAllOutdateSchedule():
 def getCurrentPeriod():
     now = datetime.datetime.now()
     if now > now.replace(hour=17, minute=0):
-        return u'晚上'
+        return periodDict['night']
     if now > now.replace(hour=13, minute=30):
-        return u'下午'
+        return periodDict['afternoon']
     if now > now.replace(hour=8, minute=0):
-        return u'上午'
+        return periodDict['morning']
