@@ -46,8 +46,8 @@ def opdTimeToPeriod(opd):
         'A': periodDict['afternoon'],
         'Z': periodDict['night'],
     }
-    if opd not in periodDict.keys(): return None
-    else: return periodDict[opd]
+    if opd not in mapOpt.keys(): return None
+    else: return mapOpt[opd]
 
 def downloadPage(url, **payload):
     # Requset

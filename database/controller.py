@@ -54,8 +54,9 @@ def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
         else:
             status = createDoctorStatus(department, doctor, period, roomStatus, calledNumber)
             status.timeDelta = stats.currentAvg
-            stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentAvg) / (stats.lastPeriodCount + 1)
-            stats.lastPeriodCount += 1
+            if stats.currentAvg != None:
+                stats.lastPeriodAvg = (stats.lastPeriodAvg * stats.lastPeriodCount + stats.currentAvg) / (stats.lastPeriodCount + 1)
+                stats.lastPeriodCount += 1
             stats.currentAvg = None
             stats.currentCount = calledNumber
             stats.currentDate = now.date(),
@@ -72,6 +73,7 @@ def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
                     stats.currentAvg = (stats.currentAvg * stats.currentCount + deltaTime) / calledNumber
                 stats.currentCount = calledNumber
                 status.calledNumber = calledNumber
+                if stats.lastPeriodAvg == None and stats.currentAvg == None:
                 status.timeDelta = stats.currentAvg * 0.6 + stats.lastPeriodAvg * 0.4
                 status.roomStatus = roomStatus
             else:
