@@ -47,11 +47,13 @@ def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
 
     if status is None:
         if stats is None:
+            # No status and stats -> First time 
             stats = createDoctorStats(department, doctor, period, calledNumber)
             status = createDoctorStatus(department, doctor, period, roomStatus, calledNumber)
             db_session.add(stats)
             db_session.add(status)
         else:
+            # No Status but stats -> No First time overall, but is today's first time
             status = createDoctorStatus(department, doctor, period, roomStatus, calledNumber)
             status.timeDelta = stats.currentAvg
             if stats.currentAvg != None:
@@ -64,7 +66,7 @@ def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
             db_session.add(status)
     else:
         if status.calledNumber != calledNumber:
-            if status.period == stats.currentPeriod and stats.currentDate != datetime.datetime.now().date():
+            if status.period == stats.currentPeriod and stats.currentDate == datetime.datetime.now().date():
                 deltaNum = calledNumber - stats.currentCount
                 deltaTime = (status.updateTime - now).total_seconds()
                 if stats.currentAvg == None:
@@ -73,8 +75,10 @@ def updateDoctorStatus(department, doctor, period, roomStatus, calledNumber):
                     stats.currentAvg = (stats.currentAvg * stats.currentCount + deltaTime) / calledNumber
                 stats.currentCount = calledNumber
                 status.calledNumber = calledNumber
-                if stats.lastPeriodAvg == None and stats.currentAvg == None:
-                status.timeDelta = stats.currentAvg * 0.6 + stats.lastPeriodAvg * 0.4
+                if stats.lastPeriodAvg == None:
+                    status.timeDelta = stats.currentAvg
+                else:
+                    status.timeDelta = stats.currentAvg * 0.6 + stats.lastPeriodAvg * 0.4
                 status.roomStatus = roomStatus
             else:
                 status.period = period
