@@ -42,8 +42,8 @@ def scrapSchedule():
 
 def opdTimeToPeriod(opd):
     mapOpt = {
-        'P': periodDict['morning'],
-        'A': periodDict['afternoon'],
+        'A': periodDict['morning'],
+        'P': periodDict['afternoon'],
         'Z': periodDict['night'],
     }
     if opd not in mapOpt.keys(): return None
